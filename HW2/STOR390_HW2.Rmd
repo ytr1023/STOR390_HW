@@ -1,0 +1,68 @@
+---
+title: "HW 2 Student"
+author: "Tianrui Ye"
+date: "2/15/2023"
+output: 
+  html_document:
+    number_sections: true
+---
+
+This homework is meant to illustrate the methods of classification algorithms as well as their potential pitfalls.  In class, we demonstrated K-Nearest-Neighbors using the `iris` dataset.  Today I will give you a different subset of this same data, and you will train a KNN classifier.  
+
+```{r, echo = FALSE}
+set.seed(123)
+library(class)
+
+df <- data(iris) 
+
+normal <-function(x) {
+  (x -min(x))/(max(x)-min(x))   
+}
+
+iris_norm <- as.data.frame(lapply(iris[,c(1,2,3,4)], normal))
+
+subset <- c(1:45, 58, 60:70, 82, 94, 110:150)
+iris_train <- iris_norm[subset,] 
+iris_test <- iris_norm[-subset,] 
+
+iris_target_category <- iris[subset,5]
+iris_test_category <- iris[-subset,5]
+
+
+```
+
+#
+Above, I have given you a training-testing partition.  Train the KNN with $K = 5$ on the training data and use this to classify the 50 test observations.  Once you have classified the test observations, create a contingency table -- like we did in class -- to evaluate which observations your algorithm is misclassifying.   
+
+```{r}
+set.seed(123)
+k <- 5
+iris_pred <- knn(train = iris_train, test = iris_test, cl = iris_target_category, k = k)
+table(Predicted = iris_pred, Actual = iris_test_category)
+
+```
+
+#
+
+Discuss your results.  If you have done this correctly, you should have a classification error rate that is roughly 20% higher than what we observed in class.  Why is this the case? In particular run a summary of the `iris_test_category` as well as `iris_target_category` and discuss how this plays a role in your answer.  
+
+
+In the class we assigned the training set and test set by randomization. Inside the assignments, the training set and test set are determined by manual selection. This way of comparing the random assignment may cause bias and unbalanced distribution of data.If the training set does not represent the test set well, especially in terms of class distribution, the classifier may not perform optimally.For example, a class that is overrepresented in the training set or underrepresented in the test set may result in a higher error rate.
+
+```{r}
+
+summary(iris_target_category)
+summary(iris_test_category)
+
+```
+
+summary shows the difference in species distribution between the training and test sets. The training set (iris_target_category) is biased towards two species (setosa and virginica) and lacks sufficient representation for the third species (versicolor), then the model will not be able to learn to classify the underrepresented species effectively. As a result, when the distribution of species in the test data (iris_test_category) is more balanced or different, the performance of the model decreases, leading to higher error rates.
+
+
+
+#
+
+Build a github repository to store your homework assignments.  Share the link in this file.  
+
+
+https://github.com/ytr1023/STOR390_HW
