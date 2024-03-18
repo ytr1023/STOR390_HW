@@ -1,0 +1,258 @@
+---
+title: "HW 4"
+author: "Tianrui Ye"
+date: "12/29/2023"
+output:
+  html_document:
+    number_sections: true
+  pdf_document: default
+---
+
+This homework is designed to give you practice fitting a logistic regression and working with statistical/philosophical measures of fairness.  We will work with the `titanic` dataset which we have previously seen in class in connection to decision trees.  
+
+Below I will preprocess the data precisely as we did in class.  You can simply refer to `data_train` as your training data and `data_test` as your testing data.  
+
+
+
+
+```{r}
+
+#this is all of the preprocessing done for the decision trees lecture.  
+
+path <- 'https://raw.githubusercontent.com/guru99-edu/R-Programming/master/titanic_data.csv'
+titanic <-read.csv(path)
+head(titanic)
+
+library(dplyr)
+
+#replace ? with NA
+replace_question_mark <- function(x) {
+  if (is.character(x)) {
+    x <- na_if(x, "?")
+  }
+  return(x)
+}
+
+titanic <- titanic %>%
+  mutate_all(replace_question_mark)
+
+set.seed(678)
+shuffle_index <- sample(1:nrow(titanic))
+head(shuffle_index)
+
+titanic <- titanic[shuffle_index, ]
+head(titanic)
+
+library(dplyr)
+# Drop variables
+clean_titanic <- titanic %>%
+select(-c(home.dest, cabin, name, x, ticket)) %>% 
+#Convert to factor level
+    mutate(pclass = factor(pclass, levels = c(1, 2, 3), labels = c('Upper', 'Middle', 'Lower')),
+    survived = factor(survived, levels = c(0, 1), labels = c('No', 'Yes'))) %>%
+na.omit()
+#previously were characters
+clean_titanic$age <- as.numeric(clean_titanic$age)
+clean_titanic$fare <- as.numeric(clean_titanic$fare)
+glimpse(clean_titanic)
+
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample <- 1: total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+    } else {
+        return (data[-train_sample, ])
+    }
+}
+data_train <- create_train_test(clean_titanic, 0.8, train = TRUE)
+data_test <- create_train_test(clean_titanic, 0.8, train = FALSE)
+
+```
+
+#
+Create a table reporting the proportion of people in the training set surviving the Titanic.  Do the same for the testing set.  Comment on whether the current training-testing partition looks suitable.  
+
+```{r}
+#Student Input
+survival_rate_train <- data_train %>%
+  group_by(survived) %>%
+  summarise(Count = n()) %>%
+  mutate(Proportion = Count / sum(Count))
+
+print(survival_rate_train)
+
+survival_rate_test <- data_test %>%
+  group_by(survived) %>%
+  summarise(Count = n()) %>%
+  mutate(Proportion = Count / sum(Count))
+
+print(survival_rate_test)
+
+```
+
+*student input*
+
+Training Set
+No (Did not survive): 60.19%
+Yes (Survived): 39.81%
+Testing Set
+No (Did not survive): 55.50%
+Yes (Survived): 44.50%
+
+The proportions of survivors and non-survivors between the training and testing sets are relatively similar, with a slight variation in the percentages. The training set has a somewhat higher proportion of non-survivors compared to the testing set, while the testing set has a higher proportion of survivors.
+
+Given the relatively close proportions, this indicates that the split between the training and testing sets is reasonable. Such a partition suggests that both sets represent the overall population of the Titanic dataset adequately.
+
+#
+Use the `glm` command to build a logistic regression on the training partition.  `survived` should be your response variable and `pclass`, `sex`, `age`, `sibsp`, and `parch` should be your response variables.  
+
+```{r}
+
+#student input
+logistic_model <- glm(survived ~ pclass + sex + age + sibsp + parch, 
+                      data = data_train, 
+                      family = "binomial")
+
+summary(logistic_model)
+
+```
+
+We would now like to test whether this classifier is *fair* across the sex subgroups.  It was reported that women and children were prioritized on the life-boats and as a result survived the incident at a much higher rate.  Let us see if our model is able to capture this fact.  
+
+#
+
+Subset your test data into a male group and a female group.  Then, use the `predict` function on the male testing group to come up with predicted probabilities of surviving the Titanic for each male in the testing set.  Do the same for the female testing group.  
+
+```{r}
+
+#student input
+male_test_data <- subset(data_test, sex == 'male')
+female_test_data <- subset(data_test, sex == 'female')
+male_predictions <- predict(logistic_model, newdata = male_test_data, type = "response")
+
+female_predictions <- predict(logistic_model, newdata = female_test_data, type = "response")
+```
+
+# 
+
+Now recall that for this logistic *regression* to be a true classifier, we need to pair it with a decision boundary.  Use an `if-else` statement to translate any predicted probability in the male group greater than $0.5$ into `Yes` (as in Yes this individual is predicted to have survived).  Likewise an predicted probability less than $0.5$ should be translated into a `No`.  
+
+Do this for the female testing group as well, and then create a confusion matrix for each of the male and female test set predictions.  You can use the `confusionMatrix` command as seen in class to expidite this process as well as provide you necessary metrics for the following questions.  
+
+```{r}
+library(caret)
+#student input
+male_predictions_class <- ifelse(male_predictions > 0.5, 'Yes', 'No')
+
+female_predictions_class <- ifelse(female_predictions > 0.5, 'Yes', 'No')
+male_predictions_class <- factor(male_predictions_class, levels = c('No', 'Yes'))
+female_predictions_class <- factor(female_predictions_class, levels = c('No', 'Yes'))
+male_test_data$survived <- factor(male_test_data$survived, levels = c('No', 'Yes'))
+female_test_data$survived <- factor(female_test_data$survived, levels = c('No', 'Yes'))
+
+male_confusion_matrix <- confusionMatrix(male_predictions_class, male_test_data$survived)
+print(male_confusion_matrix)
+
+female_confusion_matrix <- confusionMatrix(female_predictions_class, female_test_data$survived)
+print(female_confusion_matrix)
+
+```
+
+
+#
+We can see that indeed, at least within the testing groups, women did seem to survive at a higher proportion than men (24.8\% to 76.3\% in the testing set).  Print a summary of your trained model and interpret one of the fitted coefficients in light of the above disparity.  
+
+```{r}
+#student input
+summary(logistic_model)
+```
+
+*Student Input * 
+
+Coefficient for sexmale: -2.684206.
+
+The coefficient for sexmale is -2.684206, which is negative. In the context of logistic regression, a negative coefficient indicates that as the predictor variable increases (from 0 to 1 in the case of binary variables like sexmale), the log-odds of the response variable being 1 (in this case, "Yes" for survived) decrease. Since sexmale is a binary variable where male is coded as 1 and female is 0, this means that being male is associated with a lower log-odds of survival compared to being female.
+
+The p-value for sexmale is < 2e-16, which is extremely small, indicating that the effect of being male on the probability of survival is highly statistically significant. The effect size here is quite substantial. To get a sense of this effect size in terms of odds, we can exponentiate the coefficient: exp(-2.684206) = 0.068. This means that the odds of survival for males are approximately 6.8% of the odds of survival for females, holding all other variables constant. This represents a substantial decrease in the odds of survival for males compared to females.
+
+The significant and negative coefficient for sexmale aligns with the historical accounts and the observed data indicating that women had a higher survival rate on the Titanic.
+
+
+#
+
+Now let's see if our model is *fair* across this explanatory variable.  Calculate five measures (as defined in class) in this question: the Overall accuracy rate ratio between females and males, the disparate impact between females and males, the statistical parity between females and males, and the predictive equality as well as equal opportunity between females and males (collectively these last two comprise equalized odds).  Set a reasonable $\epsilon$ each time and then comment on which (if any) of these five criteria are met.  
+
+
+```{r}
+#Student Input
+accuracy_male <- sum(male_predictions_class == male_test_data$survived) / length(male_predictions_class)
+accuracy_female <- sum(female_predictions_class == female_test_data$survived) / length(female_predictions_class)
+OARR <- accuracy_female / accuracy_male
+
+selection_rate_male <- mean(male_predictions_class == "Yes")
+selection_rate_female <- mean(female_predictions_class == "Yes")
+DI <- selection_rate_female / selection_rate_male
+
+SPD <- selection_rate_female - selection_rate_male
+
+FPR_male <- sum(male_predictions_class == "Yes" & male_test_data$survived == "No") / sum(male_test_data$survived == "No")
+FPR_female <- sum(female_predictions_class == "Yes" & female_test_data$survived == "No") / sum(female_test_data$survived == "No")
+predictive_equality <- FPR_female - FPR_male
+
+TPR_male <- sum(male_predictions_class == "Yes" & male_test_data$survived == "Yes") / sum(male_test_data$survived == "Yes")
+TPR_female <- sum(female_predictions_class == "Yes" & female_test_data$survived == "Yes") / sum(female_test_data$survived == "Yes")
+equal_opportunity <- TPR_female - TPR_male
+
+cat("Overall Accuracy Rate Ratio (OARR) between females and males:", OARR, "\n")
+cat("Disparate Impact (DI) between females and males:", DI, "\n")
+cat("Statistical Parity Difference (SPD) between females and males:", SPD, "\n")
+cat("Predictive Equality between females and males:", predictive_equality, "\n")
+cat("Equal Opportunity between females and males:", equal_opportunity, "\n")
+
+
+```
+
+
+*Student Input*.  
+
+Overall Accuracy Rate Ratio (OARR) between females and males: 1.047294
+This measure is slightly above 1, indicating that the model is marginally more accurate for females than males. An OARR close to 1 suggests that the model's accuracy is relatively balanced between sexes, which is a positive indicator of fairness in terms of accuracy.
+
+Disparate Impact (DI) between females and males: 14.91563
+The DI is significantly greater than 1, indicating a substantial disparate impact against males in terms of predicted survival rates. This suggests that, compared to males, females are almost 15 times more likely to be predicted to survive, which points to a significant bias in favor of females.
+
+Statistical Parity Difference (SPD) between females and males: 0.8629845
+The SPD is far from 0, indicating a large difference in the positive prediction rates (survival rates) between females and males, with females being much more likely to be predicted to survive. This further confirms the bias observed in the DI metric.
+
+Predictive Equality between females and males: 0.7482366
+This measure indicates a substantial difference in the false positive rates between sexes, with males more likely to be incorrectly predicted to survive compared to females. This disparity suggests the model is less fair in terms of predictive equality, indicating biases in how predictive errors are distributed across genders.
+
+Equal Opportunity between females and males: 0.8422131
+This measure indicates a significant difference in true positive rates, with females being much more likely than males to be correctly predicted as survivors. This reflects a bias in favor of females regarding correctly predicting survivors, pointing towards an unfairness in equal opportunity.
+
+
+OARR suggests a relatively balanced accuracy across genders, which is good. However, all other measures indicate substantial biases in favor of females over males. DI and SPD reflect a significant bias in survival predictions in favor of females, which, while historically accurate (given the "women and children first" policy during the Titanic disaster), indicates a lack of fairness from a purely statistical standpoint. Predictive Equality and Equal Opportunity metrics indicate significant disparities in error rates and correct prediction rates, respectively, again favoring females.
+
+
+
+It is always important for us to interpret our results in light of the original data and the context of the analysis.  In this case, it is relevant that we are analyzing a historical event post-facto and any disparities across demographics identified are unlikely to be replicated.  So even though our model fails numerous of the statistical fairness criteria, I would argue we need not worry that our model could be misused to perpetuate discrimination in the future.  After all, this model is likely not being used to prescribe a preferred method of treatment in the future.  
+
+
+#
+
+Even so, provide a *philosophical* notion of justice or fairness that may have motivated the Titanic survivors to act as they did. Spell out what this philosophical notion or principle entails?
+
+*Student Input* 
+
+**Philosophical Notion of Justice or Fairness: The Principle of Vulnerability**
+
+A philosophical notion of justice that could have motivated the actions of those on the Titanic, particularly the prioritization of "women and children first," is the Principle of Vulnerability. This principle suggests that in situations of danger or where resources are scarce, priority should be given to the most vulnerable individuals.
+
+Priority to the Vulnerable: Argues that moral or ethical decisions should prioritize the protection and care of those who are most at risk of harm. This principle was manifested in the lifeboat allocation decisions during the Titanic disaster, reflecting a societal commitment to protect those perceived as less able to protect themselves.
+
+Equity Over Equality: Emphasizes equitable treatment over equal treatment, recognizing that equal treatment (giving everyone the same resources or opportunities) does not always lead to fair outcomes. The Principle of Vulnerability suggests that equitable treatment might sometimes require unequal distributions to achieve just outcomes.
+
+From a philosophical standpoint, the Principle of Vulnerability aligns with ethical theories that prioritize the well-being of the most at risk, such as some interpretations of utilitarianism (aiming to minimize suffering) and care ethics (emphasizing the importance of caring for those who cannot care for themselves). It suggests a nuanced understanding of fairness, one that goes beyond treating everyone exactly the same and instead focuses on addressing the specific needs and risks faced by different individuals or groups. It reflects a deep sense of communal responsibility and compassion, prioritizing the well-being of the most vulnerable in times of crisis. While the Principle of Vulnerability guided actions during the Titanic disaster, its application also invites reflection on contemporary issues of fairness and justice. It challenges us to consider who in society remains vulnerable today and how policies, technologies, and models might either mitigate or exacerbate their vulnerability.
+
