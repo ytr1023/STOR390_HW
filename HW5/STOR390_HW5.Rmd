@@ -1,0 +1,35 @@
+---
+title: "HW 5"
+author: "Tianrui Ye"
+date: "12/29/2023"
+output:
+  word_document: default
+  html_document:
+    number_sections: true
+  pdf_document: default
+---
+
+This homework is meant to give you practice in creating and defending a position with both statistical and philosophical evidence.  We have now extensively talked about the COMPAS ^[https://www.propublica.org/datastore/dataset/compas-recidivism-risk-score-data-and-analysis] data set, the flaws in applying it but also its potential upside if its shortcomings can be overlooked.  We have also spent time in class verbally assessing positions both for an against applying this data set in real life.  In no more than two pages ^[knit to a pdf to ensure page count] take the persona of a statistical consultant advising a judge as to whether they should include the results of the COMPAS algorithm in their decision making process for granting parole.  First clearly articulate your position (whether the algorithm should be used or not) and then defend said position using both statistical and philosophical evidence.  Your paper will be grade both on the merits of its persuasive appeal but also the applicability of the statistical and philosohpical evidence cited.  
+
+
+*STUDENT RESPONSE*
+
+To the Honorable Judge:
+
+As a statistical consultant entrusted with advising on the integration of the COMPAS recidivism risk score data into the decision-making process for granting parole, it is imperative to approach this responsibility with a comprehensive understanding of both the statistical underpinnings and the profound ethical implications of the tool in question. After careful consideration, it is my recommendation that reliance on the COMPAS system for parole decisions be reconsidered due to significant concerns regarding its accuracy, inherent biases, and the philosophical implications of its application.
+
+**Statistical Evidence Against the Use of COMPAS**
+The COMPAS recidivism risk score, while innovative in its attempt to bring data-driven insights into the judicial process, has shown considerable limitations in its predictive accuracy and fairness. Investigations, such as the extensive analysis conducted by ProPublica, reveal troubling disparities in the algorithm's performance across different racial groups. Specifically, the system was found to erroneously label black defendants as likely to reoffend at a rate nearly twice that of white defendants, raising serious concerns about the perpetuation of historical biases encoded within the data it analyzes.
+
+Furthermore, the proprietary nature of the COMPAS algorithm significantly hinders any form of independent verification or scrutiny. This opacity is at odds with the principles of transparency and accountability essential to the justice system. Without the ability to review and understand the mechanisms behind its decisions, the fairness and reliability of the COMPAS system remain in question.
+
+**Philosophical and Ethical Concerns**
+Beyond the statistical shortcomings, the use of COMPAS raises fundamental ethical questions about justice, fairness, and the role of technology in the judicial system. At the heart of these concerns is the principle of individual justice — the idea that each case deserves consideration of its unique circumstances, beyond what any algorithm can quantify. Relying on COMPAS to inform parole decisions risks undermining this principle, treating individuals as mere data points and neglecting the complex socio-economic factors that contribute to criminal behavior.
+
+Moreover, the reliance on such technology risks further entrenching systemic biases, given that algorithms can only learn from the data they are given. If this data reflects historical inequalities, the algorithm's predictions will likely perpetuate these injustices. This not only affects the individuals unjustly labeled by the system but also erodes public trust in the fairness and impartiality of the legal process.
+
+**Counterarguments and Rebuttals**
+Proponents of COMPAS argue that it introduces a level of consistency and objectivity to parole decisions, potentially reducing human error or bias. While these are valid considerations, they do not sufficiently address the fundamental issues raised by the system's inaccuracies and biases. The quest for efficiency and consistency should not come at the cost of fairness and justice. Human judgment, with all its imperfections, allows for empathy, understanding, and the possibility of redemption — qualities that an algorithm cannot replicate.
+
+**Conclusion**
+In conclusion, while the COMPAS system presents an appealing vision of a data-driven judicial process, its current implementation is fraught with issues that compromise both the integrity of parole decisions and the broader principles of justice and fairness. As such, I strongly advise against its use in determining parole eligibility. Instead, I urge a renewed focus on enhancing the transparency, accountability, and humanity of the parole decision process, investing in alternative methods that support rehabilitative efforts and address the root causes of recidivism. It is only through such measures that we can hope to achieve a more equitable and just criminal justice system.
