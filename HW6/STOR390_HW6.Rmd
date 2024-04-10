@@ -1,0 +1,157 @@
+---
+title: "HW 6"
+author: "Tianrui Ye"
+date: "1/21/2024"
+output: 
+  html_document:
+    number_sections: true
+---
+
+#
+What is the difference between gradient descent and *stochastic* gradient descent as discussed in class?  (*You need not give full details of each algorithm.  Instead you can describe what each does and provide the update step for each.  Make sure that in providing the update step for each algorithm you emphasize what is different and why.*)
+
+*Student Input*
+
+## Gradient Descent (GD)
+
+### What it Does:
+Gradient Descent is an optimization algorithm used for minimizing the cost function in a machine learning model. It updates the model's parameters by moving in the direction of the negative gradient of the cost function with respect to the parameters.
+
+### Update Step:
+The update formula for GD is:
+
+$\theta = \theta - \eta * \nabla(J(\theta)) $
+
+- `theta`: Parameters of the model.
+- `eta`: Learning rate.
+- `grad(J(theta))`: Gradient of the cost function with respect to `theta`.
+
+**Key Point:** GD uses the gradient computed from the **entire dataset** to update the parameters, which can be inefficient for large datasets.
+
+## Stochastic Gradient Descent (SGD)
+
+#### What it Does:
+Stochastic Gradient Descent updates the model's parameters using the gradient of the cost function based on a **single sample**. This process is repeated for each sample, potentially leading to faster convergence.
+
+#### Update Step:
+The update formula for SGD is:
+
+$\theta = \theta - \eta * \nabla(J(\theta; x_i, y_i))$
+
+- `x^(i), y^(i)`: A randomly chosen sample from the dataset.
+- Other symbols have the same meaning as in GD.
+
+**Key Point:** SGD performs updates using just one sample at a time, making it more efficient for large datasets but potentially leading to a more erratic path towards convergence.
+
+### Why the Difference Matters
+
+- **GD** is computationally intensive for large datasets but guarantees a smoother descent.
+- **SGD** is more efficient and can escape local minima due to its stochastic nature, though it may result in a less stable descent.
+
+Selecting between GD and SGD depends on dataset size, computational efficiency, and the specific application requirements.
+
+
+
+
+
+#
+Consider the `FedAve` algorithm.  In its most compact form we said the update step is $\omega_{t+1} = \omega_t - \eta \sum_{k=1}^K{\frac{n_k}{n}\nabla F_k(\omega_t)}$.  However, we also emphasized a more intuitive, yet equivalent, formulation given by $\omega_{t+1}^k=\omega_t-\eta\nabla F_k(\omega_t); w_{t+1} = \sum_{k=1}^K{\frac{n_k}{n}w_{t+1}^k}$.  
+
+Prove that these two formulations are equivalent.  
+(*Hint: show that if you place $\omega_{t+1}^k$ from the first equation (of the second formulation) into the second equation (of the second formulation), this second formulation will reduce to exactly the first formulation.*) 
+
+*Student Input*
+
+To prove the equivalence of the two formulations of the `FedAve` algorithm, I'll examine the intuitive formulation and demonstrate how it simplifies to the compact form.
+
+### Intuitive Formulation:
+
+1. **Individual Client Update**:
+   The first part updates the model parameters for each client \(k\) as follows:
+   $$
+   \omega_{t+1}^k = \omega_t - \eta \nabla F_k(\omega_t)
+   $$
+   Here, \(\omega_t\) are the parameters at iteration \(t\), \(\eta\) is the learning rate, and \(\nabla F_k(\omega_t)\) is the gradient of the loss function for client \(k\).
+
+2. **Global Model Update**:
+   The parameters are then aggregated to update the global model:
+   $$
+   \omega_{t+1} = \sum_{k=1}^K \frac{n_k}{n} \omega_{t+1}^k
+   $$
+
+### Compact Formulation:
+The global model parameters are updated directly in the compact form as:
+$$
+\omega_{t+1} = \omega_t - \eta \sum_{k=1}^K \frac{n_k}{n} \nabla F_k(\omega_t)
+$$
+
+### Proof of Equivalence:
+
+By substituting the expression for \(\omega_{t+1}^k\) from the intuitive formulation into its global model update equation, we get:
+$$
+\omega_{t+1} = \sum_{k=1}^K \frac{n_k}{n} (\omega_t - \eta \nabla F_k(\omega_t))
+$$
+
+Distributing the summation yields:
+$$
+\omega_{t+1} = \sum_{k=1}^K \frac{n_k}{n} \omega_t - \sum_{k=1}^K \frac{n_k}{n} \eta \nabla F_k(\omega_t)
+$$
+
+Since the sum of all clients' proportions equals 1 (\(\sum_{k=1}^K \frac{n_k}{n} = 1\)), the first term simplifies to \(\omega_t\):
+$$
+\omega_{t+1} = \omega_t - \eta \sum_{k=1}^K \frac{n_k}{n} \nabla F_k(\omega_t)
+$$
+
+This matches exactly with the compact formulation of the `FedAve` update step, proving that the intuitive and compact formulations of the `FedAve` algorithm are equivalent.
+
+
+
+#
+Now give a brief explanation as to why the second formulation is more intuitive.  That is, you should be able to explain broadly what this update is doing.  
+
+*Student Input*
+
+The second formulation of the `FedAve` algorithm is considered more intuitive for several reasons, primarily due to its clear illustration of the federated learning process. This process involves updating model parameters locally on each client before aggregating these updates to form a global model. The formulation breaks down into two distinct steps:
+
+1. **Local Update**: Each client \(k\) updates its model parameters \(\omega\) based on its own data. This is captured by:
+   $$
+   \omega_{t+1}^k = \omega_t - \eta \nabla F_k(\omega_t)
+   $$
+   This step emphasizes the decentralized aspect of federated learning, where each client individually contributes to the learning process by computing gradients based on its local dataset.
+
+2. **Global Aggregation**: After all clients have computed their local updates, these updates are aggregated to update the global model parameters. The aggregation takes into account the size of each client's dataset, ensuring that clients with more data have a proportionately larger influence on the final model. This is represented by:
+   $$
+   \omega_{t+1} = \sum_{k=1}^K \frac{n_k}{n} \omega_{t+1}^k
+   $$
+
+**Why It's Intuitive**:
+
+- **Decentralization and Collaboration**: The formulation showcases the essence of federated learning, where learning is decentralized, yet collaboratively achieved. It underscores the process of individual clients learning from their data and then pooling their knowledge to benefit the entire network.
+- **Transparency in Aggregation**: By explicitly breaking down the process into local updates and then a global aggregation, it becomes clear how each client's data contributes to the learning process. This transparency aids in understanding the federated learning mechanism, highlighting the balance between local autonomy and global coordination.
+- **Ease of Conceptualization**: This step-by-step breakdown makes it easier to conceptualize and visualize the federated learning process. It distinguishes the roles of local computation and global aggregation, making the federated learning paradigm more accessible and understandable.
+
+# 
+Explain how the harm principle places a constraint on personal autonomy.  Then, discuss whether the harm principle is *currently* applicable to machine learning models.  (*Hint: recall our discussions in the moral philosophy primer as to what grounds agency.  You should in effect be arguing whether ML models have achieved agency enough to limit the autonomy of the users of said algorithms.* )
+
+*Student Input*
+
+The harm principle, a concept popularized by John Stuart Mill in his work "On Liberty," posits that the actions of individuals should only be limited to prevent harm to others. In essence, it places a constraint on personal autonomy by arguing that one's freedom to act ends where it begins to harm others. This principle serves as a foundation for evaluating the moral and legal limits of individual behavior within society.
+
+The harm principle asserts that while individuals should be free to engage in any activities of their choice, this freedom is not absolute. It is constrained by the potential harm these activities might cause to others. Therefore, personal autonomy is limited by the societal obligation to not harm others. This principle is applied to justify various laws and moral standards that restrict individual actions, from regulations on substance abuse to laws against violence.
+
+## Applicability to Machine Learning Models
+
+Discussing the harm principle in the context of machine learning (ML) models requires examining the concept of agency. Agency, in moral philosophy, refers to the capacity of an entity to act independently and make free choices. Traditional applications of the harm principle involve agents with clear capacity for autonomy and moral reasoning, typically humans.
+
+As of our current understanding and development of ML models, these systems do not possess agency. ML models operate based on algorithms and data provided to them, lacking the independent will and moral reasoning that characterize agents in the context of the harm principle. They are tools created and used by humans and reflect the intentions, biases, and objectives of their creators and users.
+
+While ML models themselves do not have agency, the use of these models can indeed limit the autonomy of users or affect other individuals negatively, thereby invoking the harm principle. For example, a biased ML model used in hiring processes can harm job applicants by unfairly discriminating against them. In this scenario, the harm principle could be applied to limit the autonomy of organizations using such models, urging them to ensure their tools do not cause harm to individuals.
+
+## Current Applicability
+
+The harm principle is currently applicable to machine learning models, not in limiting the models themselves but in guiding the actions and decisions of those who develop and deploy these models. It serves as a moral framework to evaluate and constrain the use of ML technologies, ensuring that their impact on society adheres to ethical standards that prevent harm to individuals.
+
+In conclusion, while ML models do not possess agency and therefore are not directly subject to the harm principle, their application by human agents is. Developers, users, and policymakers must consider the potential harm their use of ML models may cause and are morally obliged to mitigate such harm, thus applying the harm principle to ensure ethical compliance in the realm of artificial intelligence.
+
+
+
