@@ -57,8 +57,6 @@ model, it is also necessary to pay more attention to the performance of
 the model on minorities and establish more comprehensive and detailed
 evaluation indexes.
 
-Translated with www.DeepL.com/Translator (free version)
-
 # Analysis of Methods
 
 ## Methodolody
@@ -157,7 +155,7 @@ following a normal distribution $N(0,1)$. I added two extreme variables:
 mostly 0, with approximately 1% of the values following $N(100,25)$. The
 latter has approximately 1% probability of being 0, with about 99% of
 the values following $N(-100,25)$. These two columns are used to
-simulate the occurrence of extreme or rare events [1]. I also created
+simulate the occurrence of extreme or rare events. I also created
 two protected attributes, simulating extremely imbalanced situations. In
 `prot_attr1`, 95% of the data is 0, and 5% of the data is 1. In
 `prot_attr2`, 10% of the data is 0, and 90% of the data is 1. The
@@ -433,13 +431,12 @@ number of false negatives.
 
 This issue is particularly concerning in the context of fairness, as the
 model's bias towards the majority class can lead to discriminatory
-outcomes for the minority class [3]. In many real-world applications,
+outcomes for the minority class. In many real-world applications,
 such as credit scoring or job hiring, the minority class may represent a
 protected group, and the model's inability to fairly assess their
-instances can perpetuate societal biases and result in unfair treatment
-[4].
+instances can perpetuate societal biases and result in unfair treatment.
 
-The significant increase in fairness metrics for the Imbalanced Data further emphasizes the need for developing fairness-aware machine learning methods that are robust to class imbalance [5]. These methods should be able to effectively learn the features of both majority and minority classes while maintaining fairness across different subgroups.
+The significant increase in fairness metrics for the Imbalanced Data further emphasizes the need for developing fairness-aware machine learning methods that are robust to class imbalance. These methods should be able to effectively learn the features of both majority and minority classes while maintaining fairness across different subgroups.
 
 Based on the above two points and analysis, it is clear that the current Fair-SGD model still has significant issues. My next goal is to modify and adjust the current Loss Function and model structure to address the problems of model prediction bias and fairness.
 
@@ -668,7 +665,7 @@ print(wide_data)
 
 The new results demonstrate significantly improved fairness on the Imbalanced Data, greatly enhancing the performance of the original method. Through oversampling, the new approach also mitigates the issue of uneven data distribution to some extent. While increasing accuracy, it avoids the overfitting situation where all predictions belong to the same label, as observed previously. Therefore, the modifications and adjustments I made to the method have optimized the current model's issues with specific data and distributions, making the model fairer from certain perspectives.
 
-The use of SMOTE for oversampling helps in addressing the class imbalance problem by generating synthetic samples for the minority class [1]. This ensures that the model receives a more balanced representation of both classes during training, reducing the bias towards the majority class. The improved distribution of samples leads to better generalization and prevents the model from overfitting to a single label.
+The use of SMOTE for oversampling helps in addressing the class imbalance problem by generating synthetic samples for the minority class . This ensures that the model receives a more balanced representation of both classes during training, reducing the bias towards the majority class. The improved distribution of samples leads to better generalization and prevents the model from overfitting to a single label.
 
 Moreover, the incorporation of the custom loss function, which considers multiple fairness metrics, plays a crucial role in promoting fairness across different subgroups. By minimizing the differences in true positive rates, false positive rates, and predicted positive rates between the subgroups, the model learns to treat them more equitably. This multi-faceted approach to fairness helps in addressing various aspects of discrimination and ensures that the model's performance is consistent across different segments of the population.
 

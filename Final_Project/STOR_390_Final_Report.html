@@ -403,7 +403,6 @@ data are extremely skewed. Finally, when evaluating the fairness of the
 model, it is also necessary to pay more attention to the performance of
 the model on minorities and establish more comprehensive and detailed
 evaluation indexes.</p>
-<p>Translated with www.DeepL.com/Translator (free version)</p>
 </div>
 <div id="analysis-of-methods" class="section level1">
 <h1>Analysis of Methods</h1>
@@ -488,8 +487,8 @@ variables, each following a normal distribution <span class="math inline">\(N(0,
 <code>rbinom(n, 1, 0.99) * rnorm(n, mean = -100, sd = 25)</code>. The
 former is mostly 0, with approximately 1% of the values following <span class="math inline">\(N(100,25)\)</span>. The latter has approximately
 1% probability of being 0, with about 99% of the values following <span class="math inline">\(N(-100,25)\)</span>. These two columns are used to
-simulate the occurrence of extreme or rare events [1]. I also created
-two protected attributes, simulating extremely imbalanced situations. In
+simulate the occurrence of extreme or rare events. I also created two
+protected attributes, simulating extremely imbalanced situations. In
 <code>prot_attr1</code>, 95% of the data is 0, and 5% of the data is 1.
 In <code>prot_attr2</code>, 10% of the data is 0, and 90% of the data is
 1. The dependent variables <code>y0</code> and <code>y1</code> were also
@@ -546,11 +545,11 @@ Furthermore, there is a severe issue within the Imbalanced Data, as
 shown in the confusion matrix printed below. It can be observed that the
 model predicts all instances as Class 1, suggesting that the model has
 not learned the features of Class 2 effectively.</p>
-<pre><code>## 13/13 - 0s - 53ms/epoch - 4ms/step</code></pre>
+<pre><code>## 13/13 - 0s - 111ms/epoch - 9ms/step</code></pre>
 <pre><code>##       Predicted
-## Actual   1   2
-##      1 365   1
-##      2  34   0</code></pre>
+## Actual   1
+##      1 366
+##      2  34</code></pre>
 <p>The poor performance of the Fair-SGD algorithm on the Imbalanced Data
 highlights the limitations of current fairness-aware machine learning
 methods when dealing with class imbalance. The algorithm’s inability to
@@ -559,14 +558,14 @@ model that favors the majority class (Class 1), resulting in a high
 number of false negatives.</p>
 <p>This issue is particularly concerning in the context of fairness, as
 the model’s bias towards the majority class can lead to discriminatory
-outcomes for the minority class [3]. In many real-world applications,
-such as credit scoring or job hiring, the minority class may represent a
+outcomes for the minority class. In many real-world applications, such
+as credit scoring or job hiring, the minority class may represent a
 protected group, and the model’s inability to fairly assess their
-instances can perpetuate societal biases and result in unfair treatment
-[4].</p>
+instances can perpetuate societal biases and result in unfair
+treatment.</p>
 <p>The significant increase in fairness metrics for the Imbalanced Data
 further emphasizes the need for developing fairness-aware machine
-learning methods that are robust to class imbalance [5]. These methods
+learning methods that are robust to class imbalance. These methods
 should be able to effectively learn the features of both majority and
 minority classes while maintaining fairness across different
 subgroups.</p>
@@ -698,8 +697,8 @@ issues with specific data and distributions, making the model fairer
 from certain perspectives.</p>
 <p>The use of SMOTE for oversampling helps in addressing the class
 imbalance problem by generating synthetic samples for the minority class
-[1]. This ensures that the model receives a more balanced representation
-of both classes during training, reducing the bias towards the majority
+. This ensures that the model receives a more balanced representation of
+both classes during training, reducing the bias towards the majority
 class. The improved distribution of samples leads to better
 generalization and prevents the model from overfitting to a single
 label.</p>
